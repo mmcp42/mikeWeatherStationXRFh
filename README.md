@@ -8,7 +8,7 @@ include files used
 - #include "DataRecord.h"       defines shape of MY data record
 - #include \<Sodaq_dataflash.h\>  access to on-board flash data
 - #include \<Sodaq_DS3231.h\>     access to on-board RTC
-- #include "Barometer.h"        barometer sensor library
+- #include \<Barometer.h\>        barometer sensor library
 - #include \<Wire.h\>             standard Arduino Wire library
 - #include "diag.h"             diagnostics support
 
