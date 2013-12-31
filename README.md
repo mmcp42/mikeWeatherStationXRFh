@@ -4,12 +4,12 @@ first release of weather station using XRF for communication
 
 include files used
 - #include \<DHT22.h\>            humidity sensor library
-- #include <EEPROM.h>           standard Arduino EEPROM access (for storing and retrieving parameters)
+- #include \<EEPROM.h\>           standard Arduino EEPROM access (for storing and retrieving parameters)
 - #include "DataRecord.h"       defines shape of MY data record
-- #include <Sodaq_dataflash.h>  access to on-board flash data
-- #include <Sodaq_DS3231.h>     access to on-board RTC
+- #include \<Sodaq_dataflash.h\>  access to on-board flash data
+- #include \<Sodaq_DS3231.h\>     access to on-board RTC
 - #include "Barometer.h"        barometer sensor library
-- #include <Wire.h>             standard Arduino Wire library
+- #include \<Wire.h\>             standard Arduino Wire library
 - #include "diag.h"             diagnostics support
 
 it also needs
