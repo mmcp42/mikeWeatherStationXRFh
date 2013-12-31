@@ -1,0 +1,84 @@
+//==============================================================
+//  mikeWeatherStation
+//
+//  rain module
+//
+//  Mike McPherson
+//  December 2013
+//==============================================================
+
+//=================================
+// rain
+//=================================
+#define RAINPIN 2
+
+//=================================
+// ticks from rain bucket
+//=================================
+int rainTicks;
+
+//=================================
+// flag to show interrupt was from rain
+//=================================
+boolean rainFlag;
+
+//=====================================================================================
+// interrupt handler for rain ticks
+//=====================================================================================
+void handleRainTick()
+{
+  // simply increment the counter
+  //=============================
+  rainTicks++;
+  rainFlag = true;
+}
+
+//=====================================================================================
+// routine to initialise rain sensor
+//=====================================================================================
+void rainInit(void)
+{
+  rainTicks = 0;
+  rainFlag = false;
+  pinMode(RAINPIN, INPUT_PULLUP);
+
+  // Sodaq Moja INT0 => D2
+  //======================
+  attachInterrupt(0, handleRainTick, FALLING);          
+  
+  // ensure interrupts are enabled
+  //==============================
+  interrupts();
+
+  DIAGPRINT("r");
+}
+
+//=====================================================================================
+// routine to show current Rain settings
+//=====================================================================================
+void rainShow(void)
+{
+  float rain;
+  int myTicks;
+      
+  // convert rainTicks to rain rate
+  //===============================
+  cli();
+  myTicks = rainTicks;
+  rainTicks = 0;
+  sei();
+  
+  // convert to mm
+  //==============
+  rain = myTicks * 0.279;
+  
+  dataRecord.rain_ticks = myTicks;
+  
+  DIAGPRINT(F("  rain rate: "));
+  DIAGPRINT(rain, 1);
+  DIAGPRINT(F(" ("));
+  DIAGPRINT(myTicks);
+  DIAGPRINTLN(F(")"));
+}
+
+
