@@ -3,7 +3,7 @@ mikeWeatherStationXRFh
 first release of weather station using XRF for communication
 
 include files used
-- #include <DHT22.h>            humidity sensor library
+- #include \<DHT22.h\>            humidity sensor library
 - #include <EEPROM.h>           standard Arduino EEPROM access (for storing and retrieving parameters)
 - #include "DataRecord.h"       defines shape of MY data record
 - #include <Sodaq_dataflash.h>  access to on-board flash data
