@@ -41,7 +41,7 @@ extern char gUserName[16];
 extern char gPassword[16];
 extern char  gFTPpath[16];
 extern char   gFtpSql[48];
-extern char  gTimeURL[32];
+extern char  gTimeURL[48];
 #endif
 
 extern char     gWxId[16];

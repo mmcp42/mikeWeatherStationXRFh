@@ -12,7 +12,7 @@
 //
 // uses SCL/SDA pins
 //=================================
-#include "Barometer.h"
+#include <Barometer.h>
 #include <Wire.h>
 Barometer barometer;
 
