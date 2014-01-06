@@ -76,7 +76,7 @@ void windShow(void)
 
   // convert to direction
   //=====================
-  for (i=0; i<sizeof(readings); i++)
+  for (i=0; i<sizeof(readings)/sizeof(readings[0]); i++)
   {
     if (windDir > readings[i] && windDir < readings[i+1])
     {
