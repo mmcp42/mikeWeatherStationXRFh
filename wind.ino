@@ -64,9 +64,9 @@ void windShow(void)
   int windDir;
   
   static int  readings[]     = {    0,    74,    88,   110,   156,   215,   267,   349,   436,   533,   617,   669,   747,   809,   859,   918, 1024};
-  static char points[][4]    = {"ESE", "ENE", "E  ", "SSE", "SE ", "SSW", "S  ", "NNE", "NE ", "WSW", "SW ", "NNW", "N  ", "WNW", "NW ", "W  "};
+  //static char points[][4]    = {"ESE", "ENE", "E  ", "SSE", "SE ", "SSW", "S  ", "NNE", "NE ", "WSW", "SW ", "NNW", "N  ", "WNW", "NW ", "W  "};
   static uint16_t bearings[] = { 1125,   675,   900,  1575,  1350,  2025,  1800,   225,   450,  2475,  2250,  3375,     0,  2925,  3150,  2700};
-  int i;
+  int i, j;
   
   // read raw data
   //==============
@@ -76,7 +76,8 @@ void windShow(void)
 
   // convert to direction
   //=====================
-  for (i=0; i<sizeof(readings)/sizeof(readings[0]); i++)
+  j = sizeof(readings)/sizeof(readings[0]);
+  for (i=0; i<j; i++)
   {
     if (windDir > readings[i] && windDir < readings[i+1])
     {

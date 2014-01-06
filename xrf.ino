@@ -92,8 +92,8 @@ void xrfWaitReply(void)
     if (xrfport.available())
     {
       charCom = xrfport.read();
+      if (charCom == '\n' || charCom == '\r')
+        break;
     }
-    if (charCom == '\n' || charCom == '\r')
-      break;
   }
 }

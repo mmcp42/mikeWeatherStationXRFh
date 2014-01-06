@@ -20,8 +20,7 @@ void checkCommands(void)
 {
   char charCom;
   char parameter;
-  long value;
-  int i, j, row, col;
+  int i;
 
   charCom = getChar();
   while (charCom != null)

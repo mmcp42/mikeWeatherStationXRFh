@@ -18,8 +18,10 @@ DateTime timeNow;
 //=====================================================================================
 void clockInit()
 {
+#ifdef GPRS
   uint32_t newTs;
-  
+#endif
+
   // initialise the clock  
   //=====================
   rtc.begin();
