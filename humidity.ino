@@ -65,7 +65,6 @@ void humidityInit(void)
 {
   // initialise humidity
   //====================
-  
   DIAGPRINT("h");
 }
 

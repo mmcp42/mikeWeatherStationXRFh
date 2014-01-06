@@ -29,7 +29,6 @@ void groveOff(void)
   //====================
   digitalWrite(GROVEPOWERPIN, LOW);
   DIAGPRINT('g');
-  DIAGFLUSH();
 }
 
 //=====================================================================================
@@ -43,7 +42,6 @@ void groveOn(void)
   {
     digitalWrite(GROVEPOWERPIN, HIGH);
     DIAGPRINT('G');
-    DIAGFLUSH();
   }
 }
 
