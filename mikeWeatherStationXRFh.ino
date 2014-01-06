@@ -211,14 +211,14 @@ void setup()
   freeRAMshow();
   separatorPrint(40);
 
-  // set Grove power off
-  //====================
-  groveOff();
-
   // ensure serial buffer empties
   //=============================
   Serial.flush();
   xrfSleep();
+
+  // set Grove power off
+  //====================
+  groveOff();
 
   // ... and sleep
   //==============
@@ -314,17 +314,19 @@ void loop()
 
   if (warmupTime == 0)
   {
-    // we've finished with the sensor warm up
-    // so now we can sleep again
-    // watchDog timer will wake us up in a bit
-    //========================================
-    groveOff();
-  
     // xrf to sleep
     //=============
     delay(100);
     Serial.flush();
     xrfSleep();
+
+    // we've finished with the sensor warm up
+    //=======================================
+    groveOff();
+
+    // so now we can sleep again
+    // watchDog timer will wake us up in a bit
+    //========================================
     sleep();
   }
 }
