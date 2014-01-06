@@ -14,10 +14,14 @@
 #include <avr/wdt.h>
 
 //=====================================================================================
-// prepare the watch dog timer
+// prepare the watch dog timer and sleep
 //=====================================================================================
-void sleepInit(void)
+void sleep(void)
 {
+  DIAGPRINT(F("s "));
+  DIAGFLUSH();
+  delay(100);
+  
   // clear various "reset" flags
   //============================
   MCUSR = 0;     
@@ -50,17 +54,7 @@ void sleepInit(void)
   // set sleep mode
   //===============
   set_sleep_mode(SLEEP_MODE_PWR_DOWN); 
-}
 
-//=====================================================================================
-// set up sleep mode and sleep
-//=====================================================================================
-void systemSleep()
-{
-  DIAGPRINT('s');
-  DIAGFLUSH();
-  delay(100);
-  
   // disable ADC
   //============
   ADCSRA &= ~_BV(ADEN);
@@ -81,6 +75,14 @@ void systemSleep()
   //===========
   ADCSRA |= _BV(ADEN);
 
+  if (wdtFlag)
+  {
+    // watchdog fired
+    //===============
+    DIAGPRINT('d');
+    wdtFlag = false;
+  }
+  
   delay(100);
   DIAGPRINT('w');
   DIAGFLUSH();

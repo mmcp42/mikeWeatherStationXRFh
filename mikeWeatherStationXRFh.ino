@@ -220,13 +220,9 @@ void setup()
   Serial.flush();
   xrfSleep();
 
-  // start the watchdog timer
-  //=========================
-  sleepInit();
-
   // ... and sleep
   //==============
-  systemSleep();
+  sleep();
 }
 
 //=====================================================================================
@@ -329,8 +325,7 @@ void loop()
     delay(100);
     Serial.flush();
     xrfSleep();
-    sleepInit();
-    systemSleep();
+    sleep();
   }
 }
 
