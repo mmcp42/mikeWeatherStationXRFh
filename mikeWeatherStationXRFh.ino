@@ -9,9 +9,13 @@
 
 //=================================
 // define GPRS to use GPRS
-// undefine to use XRF
 //=================================
 //#define GPRS 1
+
+//=================================
+// define XRF to use XRF
+//=================================
+#define XRF 1
 
 //=================================
 //RTC
@@ -35,7 +39,7 @@ extern DateTime timeNow;
 //==============================================
 // sensor warm up time in mS
 //==============================================
-#define WARMUPTIME 2000
+#define WARMUPTIME 2100
 
 //==============================================
 // time variables
@@ -66,6 +70,21 @@ boolean wdtFlag;
 //=================================
 #include "DataRecord.h"
 extern myRecord dataRecord;
+
+//=================================
+// define XRF print routines
+//=================================
+#ifdef XRF
+#define XRFPRINT(...)          diagport.print(__VA_ARGS__)
+#define XRFPRINTLN(...)        diagport.println(__VA_ARGS__)
+#define XRFFLUSH(...)          diagport.flush(__VA_ARGS__)
+#define xrfport Serial
+#else
+#define XRFPRINT(...)
+#define XRFPRINTLN(...)
+#define XRFFLUSH(...)
+#define xrfport
+#endif
 
 //=================================
 // diagnostics/debug support
@@ -111,7 +130,9 @@ void setup()
   // initialise data flash
   //======================
   dataFlashInit();  
-#else
+#endif
+
+#ifdef XRF
   // initialise XRF interface
   //=========================
   xrfInit();
@@ -120,10 +141,8 @@ void setup()
   // annonunce self to world
   //========================
   DIAGPRINTLN();
-  DIAGPRINTLN();
-  DIAGPRINT(PROGRAMID);
-  DIAGPRINTLN(PROGRAMVERSION);
-  DIAGPRINT(F("initialising "));
+  showVersion();
+  DIAGPRINT(F(" initialise: "));
   
   // initialise RTC
   //===============
@@ -196,7 +215,6 @@ void setup()
   //====================
   groveOff();
 
-  
   // ensure serial buffer empties
   //=============================
   Serial.flush();
@@ -211,16 +229,24 @@ void setup()
   systemSleep();
 }
 
-void loop2(void)
-{
-  checkCommands();
-}
-
 //=====================================================================================
 // main code loop
 //=====================================================================================
 void loop()
 {
+  if (wdtFlag)
+  {
+    // watchdog fired
+    //===============
+    DIAGPRINT('d');
+    wdtFlag = false;
+  }
+  
+  // wake up XRF
+  // for diagnostics
+  //================
+  //xrfWake();
+  
   // need grove on so RTC works properly
   //====================================
   groveOn();
@@ -303,6 +329,7 @@ void loop()
     delay(100);
     Serial.flush();
     xrfSleep();
+    sleepInit();
     systemSleep();
   }
 }
@@ -349,9 +376,10 @@ void createRecord(void)
     
     // time to write out a record
     //===========================
+    showVersion();
     
-    // start with wx id
-    //=================
+    // show wx id
+    //===========
     DIAGPRINT(F("       wxid: "));
     DIAGPRINTLN(gWxId);
     
@@ -361,25 +389,40 @@ void createRecord(void)
     DIAGPRINT(F(" start time: ")); 
     timestampShow(false);
     
+    // show time now
+    //==============
     DIAGPRINT(F("  Timestamp: ")); 
     timestampShow(true);
     tsShow();
+    
+    // RTC temperature
+    //================
     rtcTempShow();
 
-    
+    // battery voltage
+    //================
     batteryGetVoltage();
     batteryShowVoltage();
-  
+
+    // barometer temp and pressure
+    //============================
     barometerGetPressure();
     barometerShow();
-    
+
+    // wind speed and direction
+    //=========================
     windShow();
     
+    // rainfall
+    //=========
     rainShow();
-    
+  
+    // humidity temperature and %age
+    // and calcualted cloud base
+    //==============================
     humidityGetHumidity();
     humidityShow();
-    
+
 #ifdef GPRS
     // write data record to flash memory
     // but only for GPRS
@@ -390,21 +433,14 @@ void createRecord(void)
     // reset the timers
     //=================
     recordTime = epochRecord + RECORD_INTERVAL;
+    
+    // show ts for next record
+    //========================
     DIAGPRINT(F("  next time: ")); DIAGPRINTLN(recordTime);
     warmupTime = 0;
 
     separatorPrint(40);
   }
-}
-
-//=====================================================================================
-// watchDogTimer interrupt
-//=====================================================================================
-ISR(WDT_vect)
-{
-  // just set the watchdog flag
-  //===========================
-  wdtFlag = true;
 }
 
 //=====================================================================================
@@ -423,6 +459,7 @@ void timersInit(void)
 
 #ifdef GPRS
   // only used in GPRS mode
+  //=======================
   ftp2sqlTime = 0;
 #endif
 

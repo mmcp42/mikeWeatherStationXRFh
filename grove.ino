@@ -28,6 +28,8 @@ void groveOff(void)
   // set Grove power off
   //====================
   digitalWrite(GROVEPOWERPIN, LOW);
+  DIAGPRINT('g');
+  DIAGFLUSH();
 }
 
 //=====================================================================================
@@ -37,7 +39,12 @@ void groveOn(void)
 {
   // set Grove power on
   //===================
-  digitalWrite(GROVEPOWERPIN, HIGH);
+  if (!digitalRead(GROVEPOWERPIN))
+  {
+    digitalWrite(GROVEPOWERPIN, HIGH);
+    DIAGPRINT('G');
+    DIAGFLUSH();
+  }
 }
 
 

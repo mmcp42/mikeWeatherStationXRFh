@@ -18,9 +18,8 @@ DHT22 dht(DHTPIN);
 // routine to get humidity and temperature from humidity sensor
 //=====================================================================================
 void humidityGetHumidity(void)
-{
+{  
   DHT22_ERROR_t errorCode;
-
   float temp;
 
   errorCode = dht.readData();
@@ -66,6 +65,7 @@ void humidityInit(void)
 {
   // initialise humidity
   //====================
+  
   DIAGPRINT("h");
 }
 

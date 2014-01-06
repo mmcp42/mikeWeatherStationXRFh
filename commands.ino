@@ -165,16 +165,12 @@ void resetFactoryDefaults(void)
 void showVersion(void)
 {
   Serial.println();
-  Serial.print(F("dataflashTest XRF"));
-  Serial.print(' ');
-  Serial.println(F("v1.02"));
+  Serial.print(F("   software: "));
+  Serial.println(PROGRAMID);
+  Serial.print(F("    version: "));
+  Serial.println(PROGRAMVERSION);
   
-  timestampShow(true);
-
-  Serial.print(F("free RAM: ")); 
-  Serial.print(freeRAM()); 
-  Serial.println(F(" bytes"));
-  Serial.println();
+  freeRAMshow(); 
 }
 
 void showCommands(void)

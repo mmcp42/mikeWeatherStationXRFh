@@ -20,25 +20,34 @@ void xrfInit(void)
   
   // enter command mode
   //===================
-  Serial.println();
+  XRFPRINTLN();
   delay(1100);
-  Serial.print("+++");
+  XRFPRINT("+++");
   delay(1100);
   xrfWaitReply();
 
   // set sleep mode
   //===============
-  Serial.println("ATSM2");
+  XRFPRINTLN("ATSM2");
   xrfWaitReply();
   
   // exit command mode
   //==================
-  Serial.println("ATDN");
+  XRFPRINTLN("ATDN");
   xrfWaitReply();  
 }
 
 void xrfSleep(void)
 {
+  // if already asleep
+  // quietly go about business
+  //===========================
+  if (digitalRead(XRF_CTS_PIN)==HIGH)
+    return;
+
+  DIAGPRINT('x');
+  DIAGFLUSH();
+
   // set XRF module asleep
   //======================
   digitalWrite(XRF_SLEEP_PIN, HIGH);
@@ -46,14 +55,32 @@ void xrfSleep(void)
 
 void xrfWake(void)
 {
+  int looper;
+  
+  // if already awake
+  // quietly go about business
+  //===========================
+  if (digitalRead(XRF_CTS_PIN)==LOW)
+    return;
+  
   // wake up XRF module
   //===================
   digitalWrite(XRF_SLEEP_PIN, LOW);
   
   // wait for ready to send
   //=======================
-  while (digitalRead(XRF_CTS_PIN)==HIGH);
-  //delay(500);
+  for (looper = 0; looper < 1000; looper++)
+  {
+    if(digitalRead(XRF_CTS_PIN)==LOW)
+      break;
+    delayMicroseconds(100);
+  }
+  
+  if(digitalRead(XRF_CTS_PIN)==HIGH)
+    DIAGPRINT(F("xrfWake fail"));
+
+  DIAGPRINT('X');
+  DIAGFLUSH();
 }
 
 void xrfWaitReply(void)
@@ -62,9 +89,9 @@ void xrfWaitReply(void)
   
   while(true)
   {
-    if (Serial.available())
+    if (xrfport.available())
     {
-      charCom = Serial.read();
+      charCom = xrfport.read();
     }
     if (charCom == '\n' || charCom == '\r')
       break;

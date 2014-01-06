@@ -12,9 +12,10 @@
 //
 // uses SCL/SDA pins
 //=================================
-#include <Barometer.h>
+//#include <Barometer.h>
+#include <ADAFRUIT_BMP085.h>
 #include <Wire.h>
-Barometer barometer;
+Adafruit_BMP085 barometer;
 
 //=====================================================================================
 // routine to get pressure from barometer
@@ -26,12 +27,12 @@ void barometerGetPressure(void)
 
   // get the temperature
   //====================
-  temp = barometer.bmp085GetTemperature(barometer.bmp085ReadUT());
+  temp = barometer.readTemperature();
   dataRecord.temperatureP = temp * 10;
 
   // get the pressure
   //=================
-  pressure = barometer.bmp085GetPressure(barometer.bmp085ReadUP());
+  pressure = barometer.readPressure();
   dataRecord.pressure = pressure / 100;
 }
 
@@ -40,7 +41,7 @@ void barometerGetPressure(void)
 //=====================================================================================
 void barometerInit(void)
 {
-  barometer.init();
+  barometer.begin();
   DIAGPRINT("b");
 }
 

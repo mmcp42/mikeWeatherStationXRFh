@@ -42,7 +42,7 @@ void sleepInit(void)
   //
   //============================================
   WDTCSR = bit (WDIE) | bit (WDP2) | bit (WDP1);
-  
+
   // pat the dog
   //============
   wdt_reset();
@@ -57,6 +57,10 @@ void sleepInit(void)
 //=====================================================================================
 void systemSleep()
 {
+  DIAGPRINT('s');
+  DIAGFLUSH();
+  delay(100);
+  
   // disable ADC
   //============
   ADCSRA &= ~_BV(ADEN);
@@ -65,7 +69,6 @@ void systemSleep()
   //======================================
   MCUCR = bit (BODS) | bit (BODSE);
   MCUCR = bit (BODS); 
-  // DIAGPRINT("sleep... ");
 
   // sleep...
   //=========
@@ -73,11 +76,27 @@ void systemSleep()
 
   // ... and wake-up
   //================
-  // DIAGPRINTLN(" ...waken");
 
   // enable ADC
   //===========
   ADCSRA |= _BV(ADEN);
+
+  delay(100);
+  DIAGPRINT('w');
+  DIAGFLUSH();
 }
 
+//=====================================================================================
+// watchDogTimer interrupt
+//=====================================================================================
+ISR(WDT_vect)
+{
+  // just set the watchdog flag
+  //===========================
+  wdtFlag = true;
+  
+  // and disable the timer
+  //======================
+  wdt_disable();
+}
 
