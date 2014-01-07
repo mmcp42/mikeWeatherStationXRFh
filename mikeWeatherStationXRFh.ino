@@ -211,9 +211,8 @@ void setup()
   freeRAMshow();
   separatorPrint(40);
 
-  // ensure serial buffer empties
-  //=============================
-  Serial.flush();
+  // XRF off
+  //========
   xrfSleep();
 
   // set Grove power off
@@ -241,15 +240,20 @@ void loop()
   // wake up XRF
   // for diagnostics
   //================
-  //xrfWake();
+  xrfWake();
   
   // need grove on so RTC works properly
   //====================================
   groveOn();
   
+  // allow time for sensors to settle
+  //=================================
+  delay(100);
+  
   // get time from RTC
   //==================
   dataRecord.ts = getTime();
+  DIAGPRINT('g');
   
   if (dataRecord.ts >= windTime)
   { 
@@ -316,8 +320,6 @@ void loop()
   {
     // xrf to sleep
     //=============
-    delay(100);
-    Serial.flush();
     xrfSleep();
 
     // we've finished with the sensor warm up
@@ -339,6 +341,7 @@ void checkDataRecord(void)
   // get time from RTC
   //==================
   dataRecord.ts = getTime();
+  DIAGPRINT('c');
 
   if (dataRecord.ts >= recordTime)
   { 
