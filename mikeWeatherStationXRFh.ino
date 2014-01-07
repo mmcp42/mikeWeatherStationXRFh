@@ -39,7 +39,7 @@ extern DateTime timeNow;
 //==============================================
 // sensor warm up time in mS
 //==============================================
-#define WARMUPTIME 2000
+#define WARMUPTIME 2100
 
 //==============================================
 // time variables
@@ -255,7 +255,7 @@ void loop()
   
   // allow time for sensors to settle
   //=================================
-  delay(50);
+  delay(10);
   
   // get time from RTC
   //==================
