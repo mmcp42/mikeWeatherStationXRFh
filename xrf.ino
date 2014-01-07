@@ -12,29 +12,35 @@
 
 void xrfInit(void)
 {
+  boolean reply;
+  
   // initialise XRF hardware
   //========================
   pinMode(XRF_SLEEP_PIN, OUTPUT);
   pinMode(XRF_CTS_PIN, INPUT_PULLUP);
   xrfWake();
   
-  // enter command mode
-  //===================
-  XRFPRINTLN();
-  delay(1100);
-  XRFPRINT("+++");
-  delay(1100);
-  xrfWaitReply();
-
-  // set sleep mode
-  //===============
-  XRFPRINTLN("ATSM2");
-  xrfWaitReply();
+  reply = false;
+  while (reply == false)
+  {
+    // enter command mode
+    //===================
+    XRFPRINTLN();
+    delay(1100);
+    XRFPRINT("+++");
+    delay(1100);
+    reply = xrfWaitReply();
   
-  // exit command mode
-  //==================
-  XRFPRINTLN("ATDN");
-  xrfWaitReply();  
+    // set sleep mode
+    //===============
+    XRFPRINTLN("ATSM2");
+    reply = xrfWaitReply();
+  
+    // exit command mode
+    //==================
+    XRFPRINTLN("ATDN");
+    reply = xrfWaitReply();  
+  }
 }
 
 void xrfSleep(void)
@@ -45,8 +51,10 @@ void xrfSleep(void)
   if (digitalRead(XRF_CTS_PIN)==HIGH)
     return;
 
+#ifdef DEBUG
   DIAGPRINTLN('x');
   delay(100);
+#endif
   DIAGFLUSH();
 
   // set XRF module asleep
@@ -80,20 +88,28 @@ void xrfWake(void)
   if(digitalRead(XRF_CTS_PIN)==HIGH)
     DIAGPRINT(F("xrfWake fail"));
 
+#ifdef DEBUG
   DIAGPRINT('X');
+#endif
 }
 
-void xrfWaitReply(void)
+boolean xrfWaitReply(void)
 {
   char charCom;
+  int i;
   
-  while(true)
+  for (i=0; i<15; i++)
   {
     if (xrfport.available())
     {
       charCom = xrfport.read();
       if (charCom == '\n' || charCom == '\r')
+      {
+        return true;
         break;
+      }
     }
+    delay(100);
   }
+  return false;
 }

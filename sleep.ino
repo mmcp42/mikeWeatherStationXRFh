@@ -18,10 +18,12 @@
 //=====================================================================================
 void sleep(void)
 {
+#ifdef DEBUG
   DIAGPRINT(F("s "));
   DIAGFLUSH();
   delay(100);
-  
+#endif
+
   // clear various "reset" flags
   //============================
   MCUSR = 0;     
@@ -79,13 +81,17 @@ void sleep(void)
   {
     // watchdog fired
     //===============
+#ifdef DEBUG
     DIAGPRINT('d');
+#endif
     wdtFlag = false;
   }
   
+#ifdef DEBUG
   delay(100);
   DIAGPRINT('w');
   DIAGFLUSH();
+#endif
 }
 
 //=====================================================================================

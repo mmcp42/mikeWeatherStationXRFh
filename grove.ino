@@ -28,7 +28,9 @@ void groveOff(void)
   // set Grove power off
   //====================
   digitalWrite(GROVEPOWERPIN, LOW);
+#ifdef DEBUG
   DIAGPRINT('g');
+#endif
 }
 
 //=====================================================================================
@@ -41,7 +43,9 @@ void groveOn(void)
   if (!digitalRead(GROVEPOWERPIN))
   {
     digitalWrite(GROVEPOWERPIN, HIGH);
+#ifdef DEBUG
     DIAGPRINT('G');
+#endif
   }
 }
 

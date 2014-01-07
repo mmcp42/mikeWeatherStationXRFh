@@ -39,7 +39,7 @@ extern DateTime timeNow;
 //==============================================
 // sensor warm up time in mS
 //==============================================
-#define WARMUPTIME 2100
+#define WARMUPTIME 2000
 
 //==============================================
 // time variables
@@ -100,6 +100,11 @@ SoftwareSerial diagport(DIAGPORT_RX, DIAGPORT_TX);
 #else
 #define diagport Serial
 #endif
+
+//===========================================
+// define DEBUG to generate debug diagnostics
+//===========================================
+//#define DEBUG 1
 
 //=====================================================================================
 // Arduino setup
@@ -233,7 +238,9 @@ void loop()
   {
     // watchdog fired
     //===============
+#ifdef DEBUG
     DIAGPRINT('d');
+#endif
     wdtFlag = false;
   }
   
@@ -248,13 +255,15 @@ void loop()
   
   // allow time for sensors to settle
   //=================================
-  delay(100);
+  delay(50);
   
   // get time from RTC
   //==================
   dataRecord.ts = getTime();
+#ifdef DEBUG
   DIAGPRINT('g');
-  
+#endif
+
   if (dataRecord.ts >= windTime)
   { 
     // time to do wind calculation
@@ -341,7 +350,9 @@ void checkDataRecord(void)
   // get time from RTC
   //==================
   dataRecord.ts = getTime();
+#ifdef DEBUG
   DIAGPRINT('c');
+#endif
 
   if (dataRecord.ts >= recordTime)
   { 
@@ -373,7 +384,6 @@ void createRecord(void)
   //================================
   if ( (millis() - warmupTime) > WARMUPTIME)
   {
-    
     // time to write out a record
     //===========================
     showVersion();
