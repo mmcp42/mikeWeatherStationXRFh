@@ -66,9 +66,9 @@ void rtcTempShow(void)
   temp = rtc.getTemperature();
   dataRecord.temperatureRTC = temp *10;
   temp = dataRecord.temperatureRTC / 10.0;
-  DIAGPRINT(F("   RTC temp: "));
-  DIAGPRINT(temp, 1);
-  DIAGPRINTLN(F(" C"));
+  XRFPRINT(F("   RTC temp: "));
+  XRFPRINT(temp, 1);
+  XRFPRINTLN(F(" C"));
 }
 
 //=====================================================================================
@@ -90,20 +90,21 @@ void setEpoch(void)
 
   charCom = ' ';
   time = getNumber(&charCom);
-  DIAGPRINT(F("      epoch: ")); DIAGPRINTLN(time);
+  XRFPRINT(F("      epoch: ")); 
+  XRFPRINTLN(time);
   if (time > 0)
   {
     rtc.setEpoch(time);
     startTime = getTime();
-    DIAGPRINT(F(" start time: "));
-    timestampShow(false);
+    XRFPRINT(F(" start time: "));
+    timestampShow(false, true);
   }
 }
 
 //=====================================================================================
 // routine to show time
 //=====================================================================================
-void timeShow(void)
+void timeShow(boolean diag)
 {
   int hour;
   int minute;
@@ -116,23 +117,39 @@ void timeShow(void)
   second = timeNow.second();
 
   if (hour<10)
-    DIAGPRINT("0");
-  DIAGPRINT(hour, DEC);
-  DIAGPRINT(':');
+    XRFPRINT("0");
+  XRFPRINT(hour, DEC);
+  XRFPRINT(':');
   if (minute<10)
-    DIAGPRINT("0");
-  DIAGPRINT(minute, DEC);
-  DIAGPRINT(':');
+    XRFPRINT("0");
+  XRFPRINT(minute, DEC);
+  XRFPRINT(':');
   if (second<10)
-    DIAGPRINT("0");
-  DIAGPRINT(second, DEC);
-  DIAGPRINT(' ');
+    XRFPRINT("0");
+  XRFPRINT(second, DEC);
+  XRFPRINT(' ');
+
+  if (diag)
+  {
+    if (hour<10)
+      DIAGPRINT("0");
+    DIAGPRINT(hour, DEC);
+    DIAGPRINT(':');
+    if (minute<10)
+      DIAGPRINT("0");
+    DIAGPRINT(minute, DEC);
+    DIAGPRINT(':');
+    if (second<10)
+      DIAGPRINT("0");
+    DIAGPRINT(second, DEC);
+    DIAGPRINT(' ');
+  }
 }
 
 //=====================================================================================
 // routine to show timestamp and RTC temperature
 //=====================================================================================
-void timestampShow(bool fetchFirst)
+void timestampShow(boolean fetchFirst, boolean diag)
 {
   static char months[][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
@@ -151,22 +168,39 @@ void timestampShow(bool fetchFirst)
   second = timeNow.second();
   
   if (day<10)
-    DIAGPRINT("0");
-  DIAGPRINT(day, DEC);
-  DIAGPRINT('-');
-  DIAGPRINT(months[timeNow.month()-1]);
-  DIAGPRINT('-');
-  DIAGPRINT(timeNow.year(), DEC);
-  DIAGPRINT(' ');
+  {
+    XRFPRINT("0");
+    if (diag)
+      DIAGPRINT("0");
+  }
+
+  XRFPRINT(day, DEC);
+  XRFPRINT('-');
+  XRFPRINT(months[timeNow.month()-1]);
+  XRFPRINT('-');
+  XRFPRINT(timeNow.year(), DEC);
+  XRFPRINT(' ');
+
+  if (diag)
+  {
+    DIAGPRINT(day, DEC);
+    DIAGPRINT('-');
+    DIAGPRINT(months[timeNow.month()-1]);
+    DIAGPRINT('-');
+    DIAGPRINT(timeNow.year(), DEC);
+    DIAGPRINT(' ');
+  }
   
-  timeShow();
-  DIAGPRINTLN();
+  timeShow(diag);
+  XRFPRINTLN();
+  if (diag)
+    DIAGPRINTLN();
 }
 
 void tsShow(void)
 {
-  DIAGPRINT(F("         ts: "));
-  DIAGPRINTLN(timeNow.get());
+  XRFPRINT(F("         ts: "));
+  XRFPRINTLN(timeNow.get());
 }
 
 
