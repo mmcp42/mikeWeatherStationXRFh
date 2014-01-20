@@ -96,9 +96,9 @@ void batteryShowVoltage(void)
 
   batteryVoltage = dataRecord.batteryVoltage / 100.0;
 
-  DIAGPRINT(F("    Battery: "));
-  DIAGPRINT(batteryVoltage, 2);
-  DIAGPRINTLN(F(" V"));
+  XRFPRINT(F("    Battery: "));
+  XRFPRINT(batteryVoltage, 2);
+  XRFPRINTLN(F(" V"));
 }
 
 

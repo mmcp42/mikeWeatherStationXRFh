@@ -72,7 +72,7 @@ void windShow(void)
   //==============
   windDir = analogRead(WINDDIRPIN);
   
-  DIAGPRINT(F("   Wind dir: "));
+  XRFPRINT(F("   Wind dir: "));
 
   // convert to direction
   //=====================
@@ -82,13 +82,13 @@ void windShow(void)
     if (windDir > readings[i] && windDir < readings[i+1])
     {
         dataRecord.wind_dir = bearings[i];
-        DIAGPRINT(bearings[i]/10.0, 1);
+        XRFPRINT(bearings[i]/10.0, 1);
         break;
     }
   }
-  DIAGPRINT(F(" ("));
-  DIAGPRINT(windDir);
-  DIAGPRINTLN(F(")"));
+  XRFPRINT(F(" ("));
+  XRFPRINT(windDir);
+  XRFPRINTLN(F(")"));
   
   // convert windTicks to wind speed
   //================================
@@ -101,11 +101,11 @@ void windShow(void)
   
   windSpeed = myTicks * 0.6;
   
-  DIAGPRINT(F(" Wind speed: "));
-  DIAGPRINT(windSpeed, 1);
-  DIAGPRINT(F(" ("));
-  DIAGPRINT(myTicks);
-  DIAGPRINTLN(F(")"));
+  XRFPRINT(F(" Wind speed: "));
+  XRFPRINT(windSpeed, 1);
+  XRFPRINT(F(" ("));
+  XRFPRINT(myTicks);
+  XRFPRINTLN(F(")"));
 }
 
 

@@ -74,11 +74,11 @@ void rainShow(void)
   
   dataRecord.rain_ticks = myTicks;
   
-  DIAGPRINT(F("  rain rate: "));
-  DIAGPRINT(rain, 1);
-  DIAGPRINT(F(" ("));
-  DIAGPRINT(myTicks);
-  DIAGPRINTLN(F(")"));
+  XRFPRINT(F("  rain rate: "));
+  XRFPRINT(rain, 1);
+  XRFPRINT(F(" ("));
+  XRFPRINT(myTicks);
+  XRFPRINTLN(F(")"));
 }
 
 

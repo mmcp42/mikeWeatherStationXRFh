@@ -56,13 +56,13 @@ void barometerShow(void)
   hPa = dataRecord.pressure;
   temp = dataRecord.temperatureP / 10.0;
   
-  DIAGPRINT(F("      TempP: "));
-  DIAGPRINT(temp, 1);
-  DIAGPRINTLN(F(" C"));
+  XRFPRINT(F("      TempP: "));
+  XRFPRINT(temp, 1);
+  XRFPRINTLN(F(" C"));
 
-  DIAGPRINT(F("   Pressure: "));
-  DIAGPRINT(hPa);
-  DIAGPRINTLN(F(" hPa"));
+  XRFPRINT(F("   Pressure: "));
+  XRFPRINT(hPa);
+  XRFPRINTLN(F(" hPa"));
 }
 
 

@@ -61,7 +61,6 @@ void dataFlashInit(void)
 
   // show diagnostics
   //=================
-  DIAGPRINTLN();
   DIAGPRINT(F("initCurPage: ")); DIAGPRINT(curPage); DIAGPRINT("."); DIAGPRINTLN(curByte);
   DIAGPRINT(F(" uploadPage: ")); DIAGPRINTLN(uploadPage);
   if (uploadPage >= 0 && uploadPage == curPage) 
@@ -84,13 +83,15 @@ void dataFlashInitNewPage(int page)
   dataFlashErase(curPage);
   dflash.readPageToBuf1(curPage);
   curByte = 0;
+  int i;
   
   // Write new header
   //=================
   myHeader hdr;
   hdr.ts = dataRecord.ts;
   hdr.version = DATA_VERSION;
-  strncpy(hdr.magic, gMagic, sizeof(hdr.magic));
+  for (i=0; i<sizeof(hdr.magic); i++)
+    hdr.magic[i] = gMagic[i];
   hdr.page = page;
   dflash.writeStrBuf1(curByte, (uint8_t *)&hdr, sizeof(hdr));
   curByte += sizeof(hdr);
@@ -120,7 +121,7 @@ void dataRecordWriteToFlash(uint32_t epoch)
 
   // Write the record to the page
   //=============================
-  DIAGPRINT(F("wdr CurPage: ")); DIAGPRINT(curPage); DIAGPRINT("."); DIAGPRINTLN(curByte);
+  DIAGPRINT(F("wdr curPage: ")); DIAGPRINT(curPage); DIAGPRINT("."); DIAGPRINTLN(curByte);
   dataRecord.page = curPage;
   dflash.writeStrBuf1(curByte, (unsigned char *)&dataRecord, sizeof(dataRecord));
   curByte += sizeof(dataRecord);
@@ -136,7 +137,7 @@ void dataRecordWriteToFlash(uint32_t epoch)
     //==========================================
     uploadPage = curPage;
   }
-  DIAGPRINT(F(" uploadPage: ")); DIAGPRINTLN(uploadPage);
+  DIAGPRINT(F("wdr uplPage: ")); DIAGPRINTLN(uploadPage);
 }
 
 //=====================================================================================
@@ -150,7 +151,7 @@ void dataRecordWriteToFlash(uint32_t epoch)
 //=====================================================================================
 void dataRecordCloseCurPage()
 {
-  DIAGPRINT(F("ccp CurPage: ")); DIAGPRINT(curPage); DIAGPRINT("."); DIAGPRINTLN(curByte);
+  DIAGPRINT(F("ccp curPage: ")); DIAGPRINT(curPage); DIAGPRINT("."); DIAGPRINTLN(curByte);
   
   dataRecordNewCurPage();
   if (uploadPage >= 0 && getNextPage(curPage) == uploadPage) 
@@ -177,11 +178,11 @@ void dataRecordNewCurPage()
     if (!isValidUploadPage(uploadPage)) {
       uploadPage = -1;
     }
-    DIAGPRINT(F(" uploadPage: ")); DIAGPRINTLN(uploadPage);
+    DIAGPRINT(F("ncp uplPage: ")); DIAGPRINTLN(uploadPage);
   }
 
   dataFlashInitNewPage(curPage);
-  DIAGPRINT(F("ncp CurPage: ")); DIAGPRINT(curPage); DIAGPRINT("."); DIAGPRINTLN(curByte);
+  DIAGPRINT(F("ncp curPage: ")); DIAGPRINT(curPage); DIAGPRINT("."); DIAGPRINTLN(curByte);
 }
 
 

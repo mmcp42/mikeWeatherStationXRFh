@@ -89,18 +89,21 @@ void humidityShow()
   cloudBase = (temp - dewPoint) * 5;
   cloudBase = cloudBase * 100;
 
-  DIAGPRINT(F("      TempH: "));
-  DIAGPRINT(temp, 1);
-  DIAGPRINTLN(F(" C"));
-  DIAGPRINT(F("   Humidity: "));
-  DIAGPRINT(humidity, 1);
-  DIAGPRINTLN(F(" %"));
-  DIAGPRINT(F("  Dew point: "));
-  DIAGPRINT(dewPoint, 1);
-  DIAGPRINTLN(F(" C"));
-  DIAGPRINT(F("  Cloudbase: "));
-  DIAGPRINT(cloudBase);
-  DIAGPRINTLN(F(" ft est"));
+  XRFPRINT(F("      TempH: "));
+  XRFPRINT(temp, 1);
+  XRFPRINTLN(F(" C"));
+  
+  XRFPRINT(F("   Humidity: "));
+  XRFPRINT(humidity, 1);
+  XRFPRINTLN(F(" %"));
+  
+  XRFPRINT(F("  Dew point: "));
+  XRFPRINT(dewPoint, 1);
+  XRFPRINTLN(F(" C"));
+  
+  XRFPRINT(F("  Cloudbase: "));
+  XRFPRINT(cloudBase);
+  XRFPRINTLN(F(" ft est"));
 }
 
 
