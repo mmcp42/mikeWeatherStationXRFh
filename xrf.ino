@@ -7,12 +7,22 @@
 //  December 2013
 //==============================================================
 
+//======================================
+// entire module depeneds on XRF #define
+//======================================
+#ifdef XRF
+
 #define XRF_SLEEP_PIN 7
 #define XRF_CTS_PIN 8
 
 void xrfInit(void)
 {
   boolean reply;
+  int tries;
+  
+  // open the XRF serial port
+  //=========================
+  XRFBEGIN(57600);
   
   // initialise XRF hardware
   //========================
@@ -21,11 +31,11 @@ void xrfInit(void)
   xrfWake();
   
   reply = false;
-  while (reply == false)
+  for (tries = 0; tries < 5; tries++)
   {
     // enter command mode
     //===================
-    XRFPRINTLN();
+    //XRFPRINTLN();
     delay(1100);
     XRFPRINT("+++");
     delay(1100);
@@ -40,7 +50,11 @@ void xrfInit(void)
     //==================
     XRFPRINTLN("ATDN");
     reply = xrfWaitReply();  
+    
+    if (reply)
+      break;
   }
+  DIAGPRINTLN();
 }
 
 void xrfSleep(void)
@@ -55,7 +69,7 @@ void xrfSleep(void)
   DIAGPRINTLN('x');
   delay(100);
 #endif
-  DIAGFLUSH();
+  XRFFLUSH();
 
   // set XRF module asleep
   //======================
@@ -100,9 +114,10 @@ boolean xrfWaitReply(void)
   
   for (i=0; i<15; i++)
   {
-    if (xrfport.available())
+    if (XRFAVAILABLE())
     {
-      charCom = xrfport.read();
+      charCom = XRFREAD();
+      DIAGPRINT(charCom);
       if (charCom == '\n' || charCom == '\r')
       {
         return true;
@@ -113,3 +128,6 @@ boolean xrfWaitReply(void)
   }
   return false;
 }
+
+#endif
+
