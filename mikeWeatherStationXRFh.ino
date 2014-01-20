@@ -9,11 +9,13 @@
 
 //=================================
 // define GPRS to use GPRS
+// comment out if not
 //=================================
 //#define GPRS 1
 
 //=================================
 // define XRF to use XRF
+// comment out if not
 //=================================
 #define XRF 1
 
@@ -51,10 +53,7 @@ uint32_t warmupTime;      // sensor warm-up timer (non-blocking)
 uint32_t epochRecord;     // time at start of record processing
 uint32_t startTime;       // time when processor last restarted
 
-#ifdef GPRS
-                          // only used in GPRS mode
 uint32_t ftp2sqlTime;     // time for next ftp2sql command
-#endif
 
 char     gWxId[16];
 char    gMagic[ 8];
@@ -72,39 +71,73 @@ boolean wdtFlag;
 extern myRecord dataRecord;
 
 //=================================
-// define XRF print routines
+// diagnostics/debug support
 //=================================
+//#include "diag.h"
+#define diagPort Serial
+#define DIAGPRINT(...)          diagPort.print(__VA_ARGS__)
+#define DIAGPRINTLN(...)        diagPort.println(__VA_ARGS__)
+#define DIAGFLUSH(...)          diagPort.flush(__VA_ARGS__)
+
+//=================================
+// software serial used for radio
+//===============================
+#include <SoftwareSerial.h>
+#define DIAGPORT_TX     4
+#define DIAGPORT_RX     5
+
 #ifdef XRF
-#define XRFPRINT(...)          diagport.print(__VA_ARGS__)
-#define XRFPRINTLN(...)        diagport.println(__VA_ARGS__)
-#define XRFFLUSH(...)          diagport.flush(__VA_ARGS__)
-#define xrfport Serial
+//=======================================================
+// for XRF we simply print direct to the soft serial port
+//=======================================================
+#define XRFBEGIN(...)          radioPort.begin(__VA_ARGS__)
+#define XRFAVAILABLE(...)      radioPort.available(__VA_ARGS__)
+#define XRFREAD(...)           radioPort.read(__VA_ARGS__)
+#define XRFPRINT(...)          radioPort.print(__VA_ARGS__)
+#define XRFPRINTLN(...)        radioPort.println(__VA_ARGS__)
+#define XRFFLUSH(...)          radioPort.flush(__VA_ARGS__)
 #else
+//=======================================================
+// else we don't
+//=======================================================
+#define XRFBEGIN(...)
+#define XRFAVAILABLE(...)
+#define XRFREAD(...)
 #define XRFPRINT(...)
 #define XRFPRINTLN(...)
 #define XRFFLUSH(...)
-#define xrfport
 #endif
 
-//=================================
-// diagnostics/debug support
-// define to use software serial
-// comment SOFT_SERIAL out to use "real" Serial
-//=================================
-#include "diag.h"
-//#define SOFT_SERIAL 1
-
-#ifdef SOFT_SERIAL
-#include <SoftwareSerial.h>
-SoftwareSerial diagport(DIAGPORT_RX, DIAGPORT_TX);
+#ifdef GPRS
+//=======================================================
+// GPRS uses the soft serial port
+//=======================================================
+#define GPRSBEGIN(...)          radioPort.begin(__VA_ARGS__)
+#define GPRSAVAILABLE(...)      radioPort.available(__VA_ARGS__)
+#define GPRSREAD(...)           radioPort.read(__VA_ARGS__)
+#define GPRSPRINT(...)          radioPort.print(__VA_ARGS__)
+#define GPRSPRINTLN(...)        radioPort.println(__VA_ARGS__)
+#define GPRSFLUSH(...)          radioPort.flush(__VA_ARGS__)
 #else
-#define diagport Serial
+//=======================================================
+// else we don't
+//=======================================================
+#define GPRSBEGIN(...)
+#define GPRSAVAILABLE(...)
+#define GPRSREAD(...)
+#define GPRSPRINT(...)
+#define GPRSPRINTLN(...)
+#define GPRSFLUSH(...)
 #endif
+
+SoftwareSerial radioPort(DIAGPORT_RX, DIAGPORT_TX);
 
 //===========================================
 // define DEBUG to generate debug diagnostics
 //===========================================
 //#define DEBUG 1
+
+extern void listSettings(void);
 
 //=====================================================================================
 // Arduino setup
@@ -115,9 +148,14 @@ void setup()
   //==============================
   diagInit();
 
+  // announce self to world
+  //=======================
+  DIAGPRINTLN();
+
   // get settings from EEPROM
   //=========================
   eepromReadAll();
+  listSettings();
   
   // initialize the Grove power pin
   //===============================
@@ -128,9 +166,9 @@ void setup()
   groveOn();
 
 #ifdef GPRS
-  // initialise xbee interface
+  // initialise gprs interface
   //==========================
-  xbeeInit();
+  GPRSinit();
   
   // initialise data flash
   //======================
@@ -143,20 +181,11 @@ void setup()
   xrfInit();
 #endif
 
-  // annonunce self to world
-  //========================
-  DIAGPRINTLN();
-  showVersion();
   DIAGPRINT(F(" initialise: "));
   
   // initialise RTC
   //===============
   clockInit();
-  
-  // get time from RTC
-  //==================
-  dataRecord.ts = getTime();
-  startTime = dataRecord.ts;
   
   // initialise humidity
   //====================
@@ -174,6 +203,11 @@ void setup()
   //================
   rainInit();
 
+  // get time from RTC
+  //==================
+  dataRecord.ts = getTime();
+  startTime = dataRecord.ts;
+  
   // initialise timers
   //==================
   timersInit();
@@ -182,7 +216,8 @@ void setup()
   //===============
   DIAGPRINTLN();
   DIAGPRINT(F(" start time: "));
-  timestampShow(true);
+  XRFPRINT(F(" start time: "));
+  timestampShow(false, true);
   
   // bad date; power loss has stopped RTC
   //=====================================
@@ -202,7 +237,7 @@ void setup()
       //===============
       DIAGPRINTLN();
       DIAGPRINT(F(" start time: "));
-      timestampShow(true);
+      timestampShow(true, true);
     }
   }
 
@@ -214,16 +249,21 @@ void setup()
   // show amount of RAM free
   //========================
   freeRAMshow();
-  separatorPrint(40);
 
+#ifdef XRF
   // XRF off
   //========
   xrfSleep();
+#endif
 
   // set Grove power off
   //====================
   groveOff();
 
+  // empty diag buffer
+  //==================
+  DIAGFLUSH();
+  
   // ... and sleep
   //==============
   sleep();
@@ -232,7 +272,12 @@ void setup()
 //=====================================================================================
 // main code loop
 //=====================================================================================
-void loop()
+void loopTest(void)
+{
+  checkCommands();
+}
+
+void loop(void)
 {
   if (wdtFlag)
   {
@@ -244,19 +289,24 @@ void loop()
     wdtFlag = false;
   }
   
+#ifdef XRF
   // wake up XRF
-  // for diagnostics
-  //================
+  //============
   xrfWake();
-  
+#endif
+
   // need grove on so RTC works properly
   //====================================
   groveOn();
   
   // allow time for sensors to settle
   //=================================
-  delay(10);
+  delay(5);
   
+  // see if any commands to process
+  //===============================
+  checkCommands();
+
   // get time from RTC
   //==================
   dataRecord.ts = getTime();
@@ -277,25 +327,24 @@ void loop()
   //===========================================
   checkDataRecord();
   
-#ifdef SOFT_SERIAL
 #ifdef GPRS    
   // note next upload time
   //======================
   timeNow = uploadTime;
-  DIAGPRINT(F("next upload: ")); timeShow(); DIAGPRINTLN();
+  //DIAGPRINT(F("next upload: ")); timeShow(true); DIAGPRINTLN();
 
-  // only upload if SOFT_SERIAL is defined
-  // if not we're WiFi connected
-  // so t'other end does the uploading
-  //======================================
+  // is it time to upload data?
+  //===========================
   if (dataRecord.ts >= uploadTime)
   { 
     // time to upload data to the server
     //==================================
-    timeShow();
+    timeShow(true);
     DIAGPRINTLN(F("upload"));
-
     dataUpload();
+    
+    // set time for next upload
+    //=========================
     uploadTime = uploadTime + UPLOAD_INTERVAL;
 
     // schedule sql after DELAY
@@ -303,13 +352,17 @@ void loop()
     ftp2sqlTime = getTime() + FTP2SQL_DELAY;
   }
 
+  // get time from RTC
+  //==================
+  dataRecord.ts = getTime();
+
   // check ftp2sql timer
   //====================
-  if (dataRecord.ts >= ftp2sqlTime && ftp2sqlTime != 0)
+  if (dataRecord.ts > ftp2sqlTime && ftp2sqlTime != 0)
   { 
     // time to run ftp2sql on the server
     //==================================
-    timeShow();
+    timeShow(true);
     DIAGPRINTLN(F("ftp2sql"));
 
     ftp2sql();
@@ -319,17 +372,22 @@ void loop()
     ftp2sqlTime = 0;
   }
 #endif
-#endif
 
   // see if any commands to process
   //===============================
   checkCommands();
-
+  
+  // flush the diagnostic port
+  //==========================
+  DIAGFLUSH();
+  
   if (warmupTime == 0)
   {
+#ifdef XRF
     // xrf to sleep
     //=============
     xrfSleep();
+#endif
 
     // we've finished with the sensor warm up
     //=======================================
@@ -367,6 +425,8 @@ void checkDataRecord(void)
 //=====================================================================================
 void createRecord(void)
 {
+  uint8_t i;
+  
   if (warmupTime == 0)
   {
     warmupTime = millis();
@@ -375,9 +435,12 @@ void createRecord(void)
     //====================
     epochRecord = dataRecord.ts;
 
+#ifdef XRF
     // wake up XRF
     //============
     xrfWake();
+#endif
+
   }
   
   // pause while the sensors warm up
@@ -386,23 +449,23 @@ void createRecord(void)
   {
     // time to write out a record
     //===========================
-    showVersion();
+    //showVersion();
     
     // show wx id
     //===========
-    DIAGPRINT(F("       wxid: "));
-    DIAGPRINTLN(gWxId);
+    XRFPRINT(F("       wxid: "));
+    XRFPRINTLN((char*) gWxId);
     
     // show when we started
     //=====================
     timeNow = startTime;
-    DIAGPRINT(F(" start time: ")); 
-    timestampShow(false);
+    XRFPRINT(F(" start time: ")); 
+    timestampShow(false, false);
     
     // show time now
     //==============
-    DIAGPRINT(F("  Timestamp: ")); 
-    timestampShow(true);
+    XRFPRINT(F("  Timestamp: ")); 
+    timestampShow(true, false);
     tsShow();
     
     // RTC temperature
@@ -428,11 +491,11 @@ void createRecord(void)
     rainShow();
   
     // humidity temperature and %age
-    // and calcualted cloud base
+    // and calculated cloud base
     //==============================
     humidityGetHumidity();
     humidityShow();
-
+    
 #ifdef GPRS
     // write data record to flash memory
     // but only for GPRS
@@ -446,10 +509,15 @@ void createRecord(void)
     
     // show ts for next record
     //========================
-    DIAGPRINT(F("  next time: ")); DIAGPRINTLN(recordTime);
+    XRFPRINT(F("  next time: ")); 
+    XRFPRINTLN(recordTime);
     warmupTime = 0;
 
-    separatorPrint(40);
+    // separator for readability
+    //==========================
+    for (i=0; i<33; i++)
+      XRFPRINT("=");
+    XRFPRINTLN();
   }
 }
 
@@ -467,12 +535,9 @@ void timersInit(void)
   recordTime = epoch + RECORD_INTERVAL;
   uploadTime = epoch + UPLOAD_INTERVAL;
 
-#ifdef GPRS
-  // only used in GPRS mode
-  //=======================
+  // clear "time to call ftp2sql command" time
+  //==========================================
   ftp2sqlTime = 0;
-#endif
-
 }
 
 
