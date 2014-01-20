@@ -11,6 +11,18 @@
 #define CR '\r'
 #define LF '\n'
 
+#ifdef GPRS
+// data for GPRS
+//==============
+extern char      gAPN[32];
+extern char   gServer[16];
+extern char gUserName[16];
+extern char gPassword[16];
+extern char  gFTPpath[16];
+extern char   gFTPsql[48];
+extern char  gTimeURL[48];
+#endif
+
 static int freeRAM(void);
 void listSettings(void);
 
@@ -151,8 +163,15 @@ void listSettings(void)
   
   // list settings
   //==============
-  Serial.print("    wxID: "); Serial.println((char*) gWxId);
-  Serial.print("   magic: "); Serial.println((char*) gMagic);
+  Serial.print(F("       wxID: ")); Serial.println((char*) gWxId);
+  Serial.print(F("      magic: ")); Serial.println((char*) gMagic);
+//  Serial.print(F("        APN: ")); Serial.println((char*) gAPN);
+//  Serial.print(F("     server: ")); Serial.println((char*) gServer);
+//  Serial.print(F("   username: ")); Serial.println((char*) gUserName);
+//  Serial.print(F("   password: ")); Serial.println((char*) gPassword);
+//  Serial.print(F("   FTP path: ")); Serial.println((char*) gFTPpath);
+//  Serial.print(F("    FTP sql: ")); Serial.println((char*) gFTPsql);
+//  Serial.print(F("   time URL: ")); Serial.println((char*) gTimeURL);
 }
 
 void resetFactoryDefaults(void)

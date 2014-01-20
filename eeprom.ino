@@ -40,7 +40,7 @@ extern char   gServer[16];
 extern char gUserName[16];
 extern char gPassword[16];
 extern char  gFTPpath[16];
-extern char   gFtpSql[48];
+extern char   gFTPsql[48];
 extern char  gTimeURL[48];
 #endif
 
@@ -104,7 +104,7 @@ void eepromReadAll(void)
   eepromRead(&gUserName[0], eeUSERNAME, sizeof(gUserName));
   eepromRead(&gPassword[0], eePASSWORD, sizeof(gPassword));
   eepromRead( &gFTPpath[0], eeFTPPATH, sizeof(gFTPpath));
-  eepromRead(  &gFtpSql[0], eeFTPSQL, sizeof(gFtpSql));
+  eepromRead(  &gFTPsql[0], eeFTPSQL, sizeof(gFTPsql));
   eepromRead( &gTimeURL[0], eeTIMEURL, sizeof(gTimeURL));
 #endif
 
@@ -125,7 +125,7 @@ void eepromSaveAll(void)
   eepromWrite(gUserName, eeUSERNAME, sizeof(gUserName));
   eepromWrite(gPassword, eePASSWORD, sizeof(gPassword));
   eepromWrite( gFTPpath, eeFTPPATH, sizeof(gFTPpath));
-  eepromWrite(  gFtpSql, eeFTPSQL, sizeof(gFtpSql));
+  eepromWrite(  gFTPsql, eeFTPSQL, sizeof(gFTPsql));
   eepromWrite( gTimeURL, eeTIMEURL, sizeof(gTimeURL));
 #endif
 
