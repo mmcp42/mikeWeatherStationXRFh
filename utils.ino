@@ -1,7 +1,7 @@
 //==============================================================
 //  mikeWeatherStation
 //
-//  utilitiy routines module
+//  utility routines module
 //
 //  Mike McPherson
 //  December 2013
