@@ -1,7 +1,7 @@
 //==============================================================
 //  mikeWeatherStation
 //
-//  barometer module
+//  eeprom module
 //
 //  Mike McPherson
 //  December 2013
