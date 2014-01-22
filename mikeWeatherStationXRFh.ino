@@ -11,13 +11,13 @@
 // define GPRS to use GPRS
 // comment out if not
 //=================================
-//#define GPRS 1
+#define GPRS 1
 
 //=================================
 // define XRF to use XRF
 // comment out if not
 //=================================
-#define XRF 1
+//#define XRF 1
 
 //=================================
 //RTC
@@ -83,8 +83,8 @@ extern myRecord dataRecord;
 // software serial used for radio
 //===============================
 #include <SoftwareSerial.h>
-#define DIAGPORT_TX     4
-#define DIAGPORT_RX     5
+#define RADIOPORT_TX     4
+#define RADIOPORT_RX     5
 
 #ifdef XRF
 //=======================================================
@@ -130,7 +130,7 @@ extern myRecord dataRecord;
 #define GPRSFLUSH(...)
 #endif
 
-SoftwareSerial radioPort(DIAGPORT_RX, DIAGPORT_TX);
+SoftwareSerial radioPort(RADIOPORT_RX, RADIOPORT_TX);
 
 //===========================================
 // define DEBUG to generate debug diagnostics
