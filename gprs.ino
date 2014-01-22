@@ -285,7 +285,10 @@ uint32_t getEpochFromServer(void)
   if (gprsbee.doHTTPGET(gAPN, gTimeURL, buffer, sizeof(buffer))) 
   {
     DIAGPRINT(F("HTTP GET: ")); DIAGPRINTLN(buffer);
-    newTs = strtoul(buffer, &ptr, 0);
+    
+    // skip over "ts="
+    //================
+    newTs = strtoul(buffer+3, &ptr, 0);
     
     // Tweak the timestamp a little because doHTTPGET took a few second
     // to close the connection after getting the time from the server
