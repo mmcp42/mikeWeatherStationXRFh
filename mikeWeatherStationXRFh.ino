@@ -11,13 +11,13 @@
 // define GPRS to use GPRS
 // comment out if not
 //=================================
-#define GPRS 1
+//#define GPRS 1
 
 //=================================
 // define XRF to use XRF
 // comment out if not
 //=================================
-//#define XRF 1
+#define XRF 1
 
 //=================================
 //RTC
@@ -58,10 +58,12 @@ uint32_t ftp2sqlTime;     // time for next ftp2sql command
 char     gWxId[16];
 char    gMagic[ 8];
 
-//=================================
-// flag to show interrupts was from watchdog
-//=================================
+//===============================
+// flags to show interrupt source
+//===============================
 boolean wdtFlag;
+extern boolean windFlag;
+extern boolean rainFlag;
 
 //=================================
 // data record for writing results to flash
@@ -73,11 +75,28 @@ extern myRecord dataRecord;
 //=================================
 // diagnostics/debug support
 //=================================
-//#include "diag.h"
+
+//===========================================
+// define DEBUG to generate debug diagnostics
+//===========================================
+//#define DEBUG 1
+
+#ifdef DEBUG
 #define diagPort Serial
+#define DIAGINIT(...)           diagPort.begin(57600)
 #define DIAGPRINT(...)          diagPort.print(__VA_ARGS__)
 #define DIAGPRINTLN(...)        diagPort.println(__VA_ARGS__)
 #define DIAGFLUSH(...)          diagPort.flush(__VA_ARGS__)
+#else
+#define DIAGINIT(...)
+#define DIAGPRINT(...)
+#define DIAGPRINTLN(...)
+#define DIAGFLUSH(...)
+#endif
+
+// flag to clean up debug output
+//==============================
+boolean reported = false;
 
 //=================================
 // software serial used for radio
@@ -132,11 +151,6 @@ extern myRecord dataRecord;
 
 SoftwareSerial radioPort(RADIOPORT_RX, RADIOPORT_TX);
 
-//===========================================
-// define DEBUG to generate debug diagnostics
-//===========================================
-//#define DEBUG 1
-
 extern void listSettings(void);
 
 //=====================================================================================
@@ -146,16 +160,16 @@ void setup()
 {
   // start the serial (debug) port
   //==============================
-  diagInit();
+  DIAGINIT();
 
   // announce self to world
   //=======================
   DIAGPRINTLN();
 
-  // get settings from EEPROM
-  //=========================
-  eepromReadAll();
-  listSettings();
+    // get settings from EEPROM
+    //=========================
+    eepromReadAll();
+    listSettings();
   
   // initialize the Grove power pin
   //===============================
@@ -228,6 +242,8 @@ void setup()
     uint32_t x = millis();
     while ( x + 1000 > millis())
     {
+      // check commands from radio interface!
+      //=====================================
       checkCommands();
     }
 
@@ -237,6 +253,7 @@ void setup()
       //===============
       DIAGPRINTLN();
       DIAGPRINT(F(" start time: "));
+      XRFPRINT(F(" start time: "));
       timestampShow(true, true);
     }
   }
@@ -266,7 +283,7 @@ void setup()
   
   // ... and sleep
   //==============
-  sleep();
+  sleep(true);
 }
 
 //=====================================================================================
@@ -279,16 +296,59 @@ void loopTest(void)
 
 void loop(void)
 {
-  if (wdtFlag)
+  while (true)
   {
-    // watchdog fired
-    //===============
-#ifdef DEBUG
-    DIAGPRINT('d');
-#endif
-    wdtFlag = false;
+    //============================================================
+    // wind interrupt
+    //============================================================
+    if (windFlag)
+    {
+      // just clear the flag
+      //====================
+      DIAGPRINT('W');
+      DIAGFLUSH();
+      windFlag = false;
+      if (warmupTime == 0)
+        sleep(false);
+    }
+    
+    //============================================================
+    // rain interrupt
+    //============================================================
+    if (rainFlag)
+    {
+      // just clear the flag
+      //====================
+      DIAGPRINT('R');
+      DIAGFLUSH();
+      rainFlag = false;
+      if (warmupTime == 0)
+        sleep(false);
+    }
+
+    //============================================================
+    // watchdog interrupt
+    //============================================================
+    if (wdtFlag)
+    {
+      // real work, so wake up
+      //======================
+      if (!reported)
+        DIAGPRINT('T');
+      reported = true;
+      break;
+    }
+
+    // all done
+    // back to sleep
+    //==============
+    sleep(false);
   }
   
+  // we woke due to watchdog timer
+  // so may have real work to do
+  //==============================
+
 #ifdef XRF
   // wake up XRF
   //============
@@ -310,9 +370,8 @@ void loop(void)
   // get time from RTC
   //==================
   dataRecord.ts = getTime();
-#ifdef DEBUG
-  DIAGPRINT('g');
-#endif
+  if (!reported)
+    DIAGPRINT('t');
 
   if (dataRecord.ts >= windTime)
   { 
@@ -396,7 +455,8 @@ void loop(void)
     // so now we can sleep again
     // watchDog timer will wake us up in a bit
     //========================================
-    sleep();
+    wdtFlag = false;
+    reported = false;
   }
 }
 
@@ -408,9 +468,6 @@ void checkDataRecord(void)
   // get time from RTC
   //==================
   dataRecord.ts = getTime();
-#ifdef DEBUG
-  DIAGPRINT('c');
-#endif
 
   if (dataRecord.ts >= recordTime)
   { 
@@ -450,6 +507,7 @@ void createRecord(void)
     // time to write out a record
     //===========================
     //showVersion();
+    DIAGPRINT('c');
     
     // show wx id
     //===========
