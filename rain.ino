@@ -38,8 +38,6 @@ void handleRainTick()
 //=====================================================================================
 void rainInit(void)
 {
-  rainTicks = 0;
-  rainFlag = false;
   pinMode(RAINPIN, INPUT_PULLUP);
 
   // Sodaq Moja INT0 => D2
@@ -49,6 +47,9 @@ void rainInit(void)
   // ensure interrupts are enabled
   //==============================
   interrupts();
+
+  rainTicks = 0;
+  rainFlag = false;
 
   DIAGPRINT("r");
 }
