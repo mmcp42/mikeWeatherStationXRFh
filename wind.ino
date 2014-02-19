@@ -18,6 +18,10 @@
 //=================================
 int windTicks;
 
+// time of last wind calculation
+//==============================
+uint32_t lastWindTime;
+
 //=================================
 // flag to show interrupt was from wind
 //=================================
@@ -39,8 +43,7 @@ void handleWindTick()
 //=====================================================================================
 void windInit(void)
 {
-  windTicks = 0;
-  windFlag = false;
+  lastWindTime = getTime();
   pinMode(WINDSPEEDPIN, INPUT_PULLUP);
 
   // Sodaq Moja INT1 => D3
@@ -50,6 +53,9 @@ void windInit(void)
   // ensure interrupts are enabled
   //==============================
   interrupts();
+
+  windTicks = 0;
+  windFlag = false;
 
   DIAGPRINT("w");
 }
@@ -62,6 +68,7 @@ void windShow(void)
   float windSpeed;
   int myTicks;
   int windDir;
+  uint32_t windTime;
   
   static int  readings[]     = {    0,    74,    88,   110,   156,   215,   267,   349,   436,   533,   617,   669,   747,   809,   859,   918, 1024};
   //static char points[][4]    = {"ESE", "ENE", "E  ", "SSE", "SE ", "SSW", "S  ", "NNE", "NE ", "WSW", "SW ", "NNW", "N  ", "WNW", "NW ", "W  "};
@@ -97,9 +104,25 @@ void windShow(void)
   windTicks = 0;
   sei();
   
+  // get time for that many clicks
+  //==============================
+  windTime = getTime() - lastWindTime;
+  lastWindTime = getTime();
+  
   dataRecord.wind_ticks = myTicks;
   
-  windSpeed = myTicks * 0.6;
+  // convert ticks to knots
+  // conversion factor is 
+  // 1 mph = 1600 ticks/hour
+  // 1 mph = 26.6667 ticks/min
+  // 1 mph = 0.4444 ticks/sec
+  // we need to use actual time between calculations
+  //================================================
+  windSpeed = myTicks / 0.4444 / windTime;
+  
+  // 1 mph = 0.868976 kt
+  //====================
+  windSpeed = windSpeed * 0.868976;
   
   XRFPRINT(F(" Wind speed: "));
   XRFPRINT(windSpeed, 1);
