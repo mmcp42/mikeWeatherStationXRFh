@@ -16,22 +16,16 @@
 //=====================================================================================
 // prepare the watch dog timer and sleep
 //=====================================================================================
-void sleep(void)
+void sleep(boolean start)
 {
-#ifdef DEBUG
-  DIAGPRINT(F("s "));
-  DIAGFLUSH();
-  delay(100);
-#endif
-
-  // clear various "reset" flags
+  // on entry 
+  // true = start the clock
+  // false = leave clock running
   //============================
-  MCUSR = 0;     
-    
-  // allow changes, disable reset
-  //=============================
-  WDTCSR = bit (WDCE) | bit (WDE);
   
+  DIAGPRINTLN(F("s"));
+  DIAGFLUSH();
+
   // set interrupt mode and interval
   //
   // WDP3 WDP2 WDP1 WDP0 timer   ~seconds
@@ -47,11 +41,28 @@ void sleep(void)
   //    1    0    0    1 8192 mS 8
   //
   //============================================
-  WDTCSR = bit (WDIE) | bit (WDP2) | bit (WDP1);
-
-  // pat the dog
-  //============
-  wdt_reset();
+  
+  // clear various "reset" flags
+  //============================
+  MCUSR = 0;     
+    
+  if (start)
+  {
+    // starting the timer
+    //===================
+    
+    // allow changes, disable reset
+    //=============================
+    WDTCSR = bit (WDCE) | bit (WDE);
+    
+    // wdt enabled and 1 second timer
+    //===============================
+    WDTCSR = bit (WDIE) | bit (WDP2) | bit (WDP1);
+  
+    // call reset
+    //===========
+    wdt_reset();
+  }
 
   // set sleep mode
   //===============
@@ -70,28 +81,24 @@ void sleep(void)
   //=========
   sleep_mode(); 
 
+
+
+
+
   // ... and wake-up
   //================
+  
+  
+  // disable the timer
+  //==================
+  sleep_disable();
 
   // enable ADC
   //===========
   ADCSRA |= _BV(ADEN);
 
-  if (wdtFlag)
-  {
-    // watchdog fired
-    //===============
-#ifdef DEBUG
-    DIAGPRINT('d');
-#endif
-    wdtFlag = false;
-  }
-  
-#ifdef DEBUG
-  delay(100);
   DIAGPRINT('w');
   DIAGFLUSH();
-#endif
 }
 
 //=====================================================================================
@@ -102,9 +109,5 @@ ISR(WDT_vect)
   // just set the watchdog flag
   //===========================
   wdtFlag = true;
-  
-  // and disable the timer
-  //======================
-  wdt_disable();
 }
 
