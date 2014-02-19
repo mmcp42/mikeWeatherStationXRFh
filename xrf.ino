@@ -65,10 +65,9 @@ void xrfSleep(void)
   if (digitalRead(XRF_CTS_PIN)==HIGH)
     return;
 
-#ifdef DEBUG
-  DIAGPRINTLN('x');
+  DIAGPRINT('x');
   delay(100);
-#endif
+
   XRFFLUSH();
 
   // set XRF module asleep
@@ -102,9 +101,7 @@ void xrfWake(void)
   if(digitalRead(XRF_CTS_PIN)==HIGH)
     DIAGPRINT(F("xrfWake fail"));
 
-#ifdef DEBUG
   DIAGPRINT('X');
-#endif
 }
 
 boolean xrfWaitReply(void)
