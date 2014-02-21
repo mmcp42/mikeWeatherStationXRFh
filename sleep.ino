@@ -55,9 +55,9 @@ void sleep(boolean start)
     //=============================
     WDTCSR = bit (WDCE) | bit (WDE);
     
-    // wdt enabled and 1 second timer
+    // wdt enabled and 2 second timer
     //===============================
-    WDTCSR = bit (WDIE) | bit (WDP2) | bit (WDP1);
+    WDTCSR = bit (WDIE) | bit (WDP2) | bit (WDP1) | bit (WDP0);
   
     // call reset
     //===========
