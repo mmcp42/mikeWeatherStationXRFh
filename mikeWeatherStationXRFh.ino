@@ -28,13 +28,11 @@ extern DateTime timeNow;
 //==============================================
 // loop control
 //
-// every .. seconds do wind direction calculation
 // every .. seconds write data record to flash
 // every .. seconds upload data to server
 // wait .. seconds then run sql
 //==============================================
-#define WIND_INTERVAL      1  // every 1 second
-#define RECORD_INTERVAL   15  // 4 times a minute
+#define RECORD_INTERVAL   30  // twice a minute
 #define UPLOAD_INTERVAL  300  // every 5 minutes
 #define FTP2SQL_DELAY     30  // run after upload finishes
 
@@ -46,7 +44,6 @@ extern DateTime timeNow;
 //==============================================
 // time variables
 //==============================================
-uint32_t windTime;        // time for next wind calculation
 uint32_t recordTime;      // time for next record write
 uint32_t uploadTime;      // time for next data upload
 uint32_t warmupTime;      // sensor warm-up timer (non-blocking)
@@ -166,10 +163,10 @@ void setup()
   //=======================
   DIAGPRINTLN();
 
-    // get settings from EEPROM
-    //=========================
-    eepromReadAll();
-    listSettings();
+  // get settings from EEPROM
+  //=========================
+  eepromReadAll();
+  listSettings();
   
   // initialize the Grove power pin
   //===============================
@@ -361,7 +358,7 @@ void loop(void)
   
   // allow time for sensors to settle
   //=================================
-  delay(5);
+  delay(15);
   
   // see if any commands to process
   //===============================
@@ -373,15 +370,6 @@ void loop(void)
   if (!reported)
     DIAGPRINT('t');
 
-  if (dataRecord.ts >= windTime)
-  { 
-    // time to do wind calculation
-    //============================
-    //timeShow();
-    //DIAGPRINTLN(F("wind"));
-    windTime = windTime + WIND_INTERVAL;
-  }
-  
   // check if it's time to create a data record
   //===========================================
   checkDataRecord();
@@ -589,7 +577,6 @@ void timersInit(void)
   // initialise timers to current clock setting
   //===========================================
   epoch = rtc.now().get();
-  windTime = epoch + WIND_INTERVAL;
   recordTime = epoch + RECORD_INTERVAL;
   uploadTime = epoch + UPLOAD_INTERVAL;
 
