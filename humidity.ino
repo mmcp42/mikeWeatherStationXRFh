@@ -7,21 +7,39 @@
 //  December 2013
 //==============================================================
 
-//=================================
+//============================================
 // temp & humidity
-//=================================
+//
+// define DHT22 or SHT21 to select sensor type
+//============================================
+
+//#define DHT22 1
+#define SHT21 1
+
+#ifdef DHT22
 #include <DHT22.h>
 #define DHTPIN     A3
 DHT22 dht(DHTPIN);
+#endif
+
+#ifdef SHT21
+// uses SCL/SDA pins
+//==================
+#include <SHT2x.h>
+#endif
 
 //=====================================================================================
 // routine to get humidity and temperature from humidity sensor
 //=====================================================================================
 void humidityGetHumidity(void)
 {  
+#ifdef DHT22
   DHT22_ERROR_t errorCode;
+#endif
+
   float temp;
 
+#ifdef DHT22
   errorCode = dht.readData();
   switch(errorCode)
   {
@@ -56,6 +74,20 @@ void humidityGetHumidity(void)
       DIAGPRINTLN(F("Polled to quick"));
       break;
   }
+#endif
+
+#ifdef SHT21
+  temp = SHT2x.GetHumidity();
+  dataRecord.humidity = temp * 10;
+  
+  temp = SHT2x.GetTemperature();
+  dataRecord.temperatureH = temp * 10;
+
+  DIAGPRINT(F("[ SHT21] Humidity(%): "));
+  DIAGPRINT(dataRecord.humidity/ 10.0, 1);
+  DIAGPRINT(F("    Temperature(C): "));
+  DIAGPRINTLN(dataRecord.temperatureH / 10.0, 1);
+#endif
 }
 
 //=====================================================================================
