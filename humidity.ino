@@ -9,74 +9,19 @@
 
 //============================================
 // temp & humidity
-//
-// define DHT22 or SHT21 to select sensor type
 //============================================
 
-//#define DHT22 1
-#define SHT21 1
-
-#ifdef DHT22
-#include <DHT22.h>
-#define DHTPIN     A3
-DHT22 dht(DHTPIN);
-#endif
-
-#ifdef SHT21
 // uses SCL/SDA pins
 //==================
 #include <SHT2x.h>
-#endif
 
 //=====================================================================================
 // routine to get humidity and temperature from humidity sensor
 //=====================================================================================
 void humidityGetHumidity(void)
 {  
-#ifdef DHT22
-  DHT22_ERROR_t errorCode;
-#endif
-
   float temp;
 
-#ifdef DHT22
-  errorCode = dht.readData();
-  switch(errorCode)
-  {
-    case DHT_ERROR_NONE:
-      // get raw readings
-      //=================
-      temp = dht.getHumidity();
-      dataRecord.humidity = temp * 10;      
-
-      temp = dht.getTemperatureC();
-      dataRecord.temperatureH = temp * 10;
-      break;
-    case DHT_ERROR_CHECKSUM:
-      DIAGPRINTLN(F("checksum error"));
-      break;
-    case DHT_BUS_HUNG:
-      DIAGPRINTLN(F("BUS Hung"));
-      break;
-    case DHT_ERROR_NOT_PRESENT:
-      DIAGPRINTLN(F("Not Present"));
-      break;
-    case DHT_ERROR_ACK_TOO_LONG:
-      DIAGPRINTLN(F("ACK time out"));
-      break;
-    case DHT_ERROR_SYNC_TIMEOUT:
-      DIAGPRINTLN(F("Sync Timeout"));
-      break;
-    case DHT_ERROR_DATA_TIMEOUT:
-      DIAGPRINTLN(F("Data Timeout"));
-      break;
-    case DHT_ERROR_TOOQUICK:
-      DIAGPRINTLN(F("Polled to quick"));
-      break;
-  }
-#endif
-
-#ifdef SHT21
   temp = SHT2x.GetHumidity();
   dataRecord.humidity = temp * 10;
   
@@ -87,7 +32,6 @@ void humidityGetHumidity(void)
   DIAGPRINT(dataRecord.humidity/ 10.0, 1);
   DIAGPRINT(F("    Temperature(C): "));
   DIAGPRINTLN(dataRecord.temperatureH / 10.0, 1);
-#endif
 }
 
 //=====================================================================================
