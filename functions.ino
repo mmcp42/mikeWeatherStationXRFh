@@ -80,23 +80,21 @@ long getNumber(char *terminator)
     {
       // read hex digit
       //================
-      while ( (charCom>='0' && charCom<='9') || (charCom >= 'A' && charCom <= 'F') )
+      if ( (charCom>='0' && charCom<='9') || (charCom >= 'A' && charCom <= 'F') )
       {
         if (charCom>='0' && charCom<='9')
           P1 = P1 * 16 + charCom - '0';
         else
           P1 = P1 * 16 + charCom - 'A' + 10;
-        charCom = getChar();
       }
     }
     else
     {
       // read P1 as a decimal number
       //============================
-      while ((charCom>='0') && (charCom<='9'))
+      if ((charCom>='0') && (charCom<='9'))
       {
         P1 = P1 * 10 + charCom - '0';
-        charCom = getChar();
       }
     }
     charCom = getChar();
