@@ -76,7 +76,7 @@ extern myRecord dataRecord;
 //===========================================
 // define DEBUG to generate debug diagnostics
 //===========================================
-//#define DEBUG 1
+#define DEBUG 1
 
 #ifdef DEBUG
 #define diagPort Serial
@@ -219,6 +219,30 @@ void setup()
   dataRecord.ts = getTime();
   startTime = dataRecord.ts;
   
+  // bad date; power loss has stopped RTC
+  //=====================================
+  while (startTime < 10000)
+  {
+    // check if we got a new epoch time command
+    //=========================================
+    checkCommands();
+
+    if(startTime < 10000)
+    {
+      // show timestamp
+      //===============
+      Serial.println();
+      Serial.print(F(" start time: "));
+      XRFPRINT(F(" start time: "));
+      timestampShow(true, true);
+    }
+    
+    // once a second 
+    // so we don't overload the server
+    //================================
+    delay(1000);
+  }
+
   // initialise timers
   //==================
   timersInit();
@@ -230,31 +254,6 @@ void setup()
   XRFPRINT(F(" start time: "));
   timestampShow(false, true);
   
-  // bad date; power loss has stopped RTC
-  //=====================================
-  while (startTime < 10000)
-  {
-    // check if we got a new epoch time command
-    //=========================================
-    uint32_t x = millis();
-    while ( x + 1000 > millis())
-    {
-      // check commands from radio interface!
-      //=====================================
-      checkCommands();
-    }
-
-    if(startTime < 10000)
-    {
-      // show timestamp
-      //===============
-      DIAGPRINTLN();
-      DIAGPRINT(F(" start time: "));
-      XRFPRINT(F(" start time: "));
-      timestampShow(true, true);
-    }
-  }
-
   // clear the interrupt flags
   //==========================
   wdtFlag = false;
@@ -474,6 +473,9 @@ void createRecord(void)
   
   if (warmupTime == 0)
   {
+    // just started
+    // so get things warmed up
+    //========================
     warmupTime = millis();
 
     // save the epoch time
